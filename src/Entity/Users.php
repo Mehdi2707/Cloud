@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UsersRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -28,6 +30,14 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     private ?string $password = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UploadedFiles::class)]
+    private Collection $uploadedFiles;
+
+    public function __construct()
+    {
+        $this->uploadedFiles = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -97,5 +107,35 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection<int, UploadedFiles>
+     */
+    public function getUploadedFiles(): Collection
+    {
+        return $this->uploadedFiles;
+    }
+
+    public function addUploadedFile(UploadedFiles $uploadedFile): static
+    {
+        if (!$this->uploadedFiles->contains($uploadedFile)) {
+            $this->uploadedFiles->add($uploadedFile);
+            $uploadedFile->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUploadedFile(UploadedFiles $uploadedFile): static
+    {
+        if ($this->uploadedFiles->removeElement($uploadedFile)) {
+            // set the owning side to null (unless already changed)
+            if ($uploadedFile->getUser() === $this) {
+                $uploadedFile->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }
