@@ -8,18 +8,21 @@
             <div class="col">
                 <h1>Inscription</h1>
 
-                {{ form_errors(registrationForm) }}
                 {{ form_start(registrationForm) }}
                     <div class="mb-3">
-                        {{ form_row(registrationForm.username) }}
+                        {{ form_label(registrationForm.username) }}
+                        {{ form_widget(registrationForm.username) }}
+                        {{ form_errors(registrationForm.username) }}
                     </div>
                     <div class="mb-3">
-                        {{ form_row(registrationForm.plainPassword, {
-                            label: 'Mot de passe'
-                        }) }}
+                        {{ form_label(registrationForm.plainPassword) }}
+                        {{ form_widget(registrationForm.plainPassword) }}
+                        {{ form_errors(registrationForm.plainPassword) }}
                     </div>
                     <div class="mb-3 form-check">
-                        {{ form_row(registrationForm.agreeTerms) }}
+                        {{ form_label(registrationForm.agreeTerms) }}
+                        {{ form_widget(registrationForm.agreeTerms) }}
+                        {{ form_errors(registrationForm.agreeTerms) }}
                     </div>
                     <button type="submit" class="btn btn-primary">M'inscrire</button>
                 {{ form_end(registrationForm) }}

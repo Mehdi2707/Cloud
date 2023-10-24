@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('assets/js/alert.js') }}" defer></script>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1>Administration</h1>
+                <br>
+            </div>
+
+            <div class="col-6">
+                <h3>Nouveaux utilisateurs :</h3>
+                <div class="pt-2">
+                    {% for user in users %}
+                        {% if user.isValid == false %}
+                            <p>{{ user.username }} : <a data-alert-on href="{{ path('app_admin_access_on', {username: user.username}) }}">Autoriser l'accès</a></p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-6">
+                <h3>Utilisateurs actifs :</h3>
+                <div class="pt-2">
+                    {% for user in users %}
+                        {% if user.isValid == true %}
+                            <p>{{ user.username }} : <a data-alert-off href="{{ path('app_admin_access_off', {username: user.username}) }}">Refuser l'accès</a></p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

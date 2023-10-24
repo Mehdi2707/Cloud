@@ -20,6 +20,9 @@ class UploadedFiles
     #[ORM\JoinColumn(nullable: false)]
     private ?Users $user = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $original_name = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -45,6 +48,18 @@ class UploadedFiles
     public function setUser(?Users $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getOriginalName(): ?string
+    {
+        return $this->original_name;
+    }
+
+    public function setOriginalName(string $original_name): static
+    {
+        $this->original_name = $original_name;
 
         return $this;
     }

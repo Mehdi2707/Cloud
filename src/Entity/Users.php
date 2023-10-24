@@ -34,6 +34,9 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UploadedFiles::class)]
     private Collection $uploadedFiles;
 
+    #[ORM\Column]
+    private ?bool $is_valid = false;
+
     public function __construct()
     {
         $this->uploadedFiles = new ArrayCollection();
@@ -135,6 +138,18 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
                 $uploadedFile->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getIsValid(): ?bool
+    {
+        return $this->is_valid;
+    }
+
+    public function setIsValid(bool $is_valid): static
+    {
+        $this->is_valid = $is_valid;
 
         return $this;
     }
