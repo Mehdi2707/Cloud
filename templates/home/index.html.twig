@@ -2,20 +2,42 @@
 
 {% block title %}Mon espace{% endblock %}
 
+{% block javascripts %}
+    <script src="{{ asset('assets/js/upload.js') }}" defer></script>
+{% endblock %}
+
 {% block body %}
     <div class="container">
         <div class="row">
-            <div class="col-12">
-                <h1>Adding a new product</h1>
+            <div class="col-lg-5 col-12 m-auto">
+                <h3>Ajouter un nouveau fichier</h3>
 
-                {{ form_start(form) }}
-                {{ form_row(form.name) }}
-                <button type="submit" class="btn btn-primary">Ajouter</button>
-                {{ form_end(form) }}
+                <div class="mb-3">
+                    <input class="form-control" type="file" id="uploaded_files_form_name" name="uploaded_files_form[name]" required="required">
+                </div>
 
-                {% for file in files %}
-                    Télécharger : <a href="#">{{ file.name }}</a>
-                {% endfor %}
+                <div class="progress" role="progressbar" aria-label="Animated striped" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0">0%</div>
+                </div>
+            </div>
+
+            <div class="col-12 mt-3">
+                <div class="d-flex flex-wrap justify-content-center file-list">
+                    {% for file in files %}
+                        <div class="card m-2" style="width: 16rem;">
+                            <div class="card-body">
+                                {% if file.originalName|length > 20%}
+                                    <h5 class="card-title">{{ file.originalName|slice(0,20) }}...</h5>
+                                {% else %}
+                                    <h5 class="card-title">{{ file.originalName }}</h5>
+                                {% endif %}
+                                <a href="{{ path('app_view', {fileName: file.name}) }}" class="btn btn-outline-dark btn-sm">Voir</a>
+                                <a href="{{ path('app_download', {fileName: file.name}) }}" class="btn btn-dark btn-sm">Télécharger</a>
+                                <a href="{{ path('app_delete', {fileName: file.name}) }}" class="btn btn-danger btn-sm">Supprimer</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
