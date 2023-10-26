@@ -21,11 +21,5 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-#    App\Service\FileUploadService:
-#        autowire: true
-#
-#    App\MessageHandler\FileUploadHandler: # Handler pour traiter les messages
-#        tags:
-#            - { name: messenger.message_handler }
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

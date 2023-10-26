@@ -18,7 +18,7 @@ class UploadedFilesFormType extends AbstractType
                 'label' => 'Ajouter un fichier',
                 'constraints' => [
                     new File([
-                        'maxSize' => '2000M',
+                        'maxSize' => '100000k',
                         'maxSizeMessage' => 'Le fichier est trop lourd ({{ size }} {{ suffix }}). La taille maximum autorisé est de {{ limit }} {{ suffix }}.',
                         'mimeTypes' => [
                             'application/pdf',
