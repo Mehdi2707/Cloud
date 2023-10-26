@@ -70,7 +70,7 @@ class HomeController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $filePath = '/home/mehdi/' . $user->getUsername() . '/' . $fileName;
+        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
 
         if (file_exists($filePath))
         {
@@ -98,7 +98,7 @@ class HomeController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $filePath = '/home/mehdi/' . $user->getUsername() . '/' . $fileName;
+        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
 
         if (file_exists($filePath) && is_file($filePath))
         {
@@ -130,7 +130,7 @@ class HomeController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $filePath = '/home/mehdi/' . $user->getUsername() . '/' . $fileName;
+        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
 
         if (file_exists($filePath)) {
             $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);

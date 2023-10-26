@@ -13,11 +13,13 @@ class FileUploadService
 {
     private $slugger;
     private $entityManager;
+    private $uploadDirectory;
 
-    public function __construct(SluggerInterface $slugger, EntityManagerInterface $entityManager)
+    public function __construct(SluggerInterface $slugger, EntityManagerInterface $entityManager, string $uploadDirectory)
     {
         $this->slugger = $slugger;
         $this->entityManager = $entityManager;
+        $this->uploadDirectory = $uploadDirectory;
     }
 
     public function uploadFile($file, Users $user): FileException|bool|\Exception|array
@@ -31,15 +33,15 @@ class FileUploadService
             $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
 
             try {
-                if(!$filesystem->exists('/home/mehdi/'.$user->getUsername()))
-                    $filesystem->mkdir('/home/mehdi/'.$user->getUsername());
+                if(!$filesystem->exists($this->uploadDirectory.$user->getUsername()))
+                    $filesystem->mkdir($this->uploadDirectory.$user->getUsername());
 
             } catch (FileException $e) {
                 return $e;
             }
 
             $file->move(
-                '/home/mehdi/'.$user->getUsername(),
+                $this->uploadDirectory.$user->getUsername(),
                 $newFilename
             );
 
