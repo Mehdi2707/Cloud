@@ -38,7 +38,7 @@ class HomeController extends AbstractController
         $user = $this->getUser();
 
         if(!$user->getIsValid())
-            return new JsonResponse(['success' => false, 'error' => 'Erreur lors de l\'upload']);
+            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload', Response::HTTP_BAD_REQUEST]);
 
         if ($request->isXmlHttpRequest())
         {
@@ -51,13 +51,13 @@ class HomeController extends AbstractController
                 if ($result)
                     return new JsonResponse($result);
                 else
-                    return new JsonResponse(['success' => false, 'error' => 'Erreur lors de l\'upload']);
+                    return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload'], Response::HTTP_BAD_REQUEST);
             }
             else
-                return new JsonResponse(['success' => false, 'error' => 'Aucun fichier trouvé']);
+                return new JsonResponse(['success' => false, 'message' => 'Aucun fichier trouvé'], Response::HTTP_BAD_REQUEST);
         }
 
-        return new JsonResponse(['success' => false, 'error' => 'Erreur lors de l\'upload']);
+        return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload'], Response::HTTP_BAD_REQUEST);
     }
 
     #[Route('/download/{fileName}', name: 'app_download')]

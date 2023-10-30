@@ -38,6 +38,13 @@ $('#uploaded_files_form_name').change(function ()
             });
             return xhr;
         },
+        error: function (data)
+        {
+            alert(data.responseJSON.message);
+            $('.progress-bar').removeClass('progress-bar-striped progress-bar-animated').addClass('bg-danger');
+            $('.progress-bar').width('100%');
+            $('.progress-bar').text(data.responseJSON.message);
+        },
         success: function (data)
         {
             $('.progress-bar').removeClass('progress-bar-striped progress-bar-animated').addClass('bg-success');

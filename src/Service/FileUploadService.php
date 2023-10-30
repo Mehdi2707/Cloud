@@ -27,16 +27,22 @@ class FileUploadService
         $filesystem = new Filesystem();
         $uploadedFile = new UploadedFiles();
 
-        if ($file) {
+        if ($file)
+        {
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $safeFilename = $this->slugger->slug($originalFilename);
             $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
 
-            try {
+            if(!$filesystem->exists($this->uploadDirectory))
+                return false;
+
+            try
+            {
                 if(!$filesystem->exists($this->uploadDirectory.$user->getUsername()))
                     $filesystem->mkdir($this->uploadDirectory.$user->getUsername());
-
-            } catch (FileException $e) {
+            }
+            catch (FileException $e)
+            {
                 return $e;
             }
 
