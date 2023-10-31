@@ -27,15 +27,13 @@ class FileUploadService
         $filesystem = new Filesystem();
         $uploadedFile = new UploadedFiles();
         $storage = $user->getStorage();
+        $storageOct = round($storage * 1073741824, 2);
         $storageUsed = $user->getStorageUsed();
-        $storageUsedGo = round($storageUsed / 1073741824, 2);
-        $fileSizeMax = ($storage - $storageUsedGo);
+        $fileSizeMax = ($storageOct - $storageUsed);
 
         if ($file)
         {
-            $fileSizeGo = round($fileSize / 1073741824, 2);
-
-            if($fileSizeGo > $fileSizeMax)
+            if($fileSize > $fileSizeMax)
                 return false;
 
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);

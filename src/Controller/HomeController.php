@@ -32,7 +32,11 @@ class HomeController extends AbstractController
         $storageUsed = $user->getStorageUsed();
 
         $storageUsedGo = round($storageUsed / 1073741824, 2);
-        $pourcentageStorageUsed = round(($storageUsedGo / $storage) * 100);
+
+        if(!$storage)
+            $pourcentageStorageUsed = 0;
+        else
+            $pourcentageStorageUsed = round(($storageUsedGo / $storage) * 100);
 
         return $this->render('home/index.html.twig', [
             'files' => $user->getUploadedFiles(),
