@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UploadedFilesRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UploadedFilesRepository::class)]
@@ -22,6 +23,9 @@ class UploadedFiles
 
     #[ORM\Column(length: 255)]
     private ?string $original_name = null;
+
+    #[ORM\Column(type: Types::BIGINT)]
+    private ?string $size = null;
 
     public function getId(): ?int
     {
@@ -60,6 +64,18 @@ class UploadedFiles
     public function setOriginalName(string $original_name): static
     {
         $this->original_name = $original_name;
+
+        return $this;
+    }
+
+    public function getSize(): ?string
+    {
+        return $this->size;
+    }
+
+    public function setSize(string $size): static
+    {
+        $this->size = $size;
 
         return $this;
     }

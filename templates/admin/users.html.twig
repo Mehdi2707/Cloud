@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1>Administration</h1>
+                <br>
+            </div>
+
+            <div class="col-6 m-auto">
+                <ul class="list-group">
+                    {% for user in users %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ user.username }}
+                            <span class="badge bg-dark rounded-pill">{{ (user.storageUsed/1073741824)|round(2, 'floor') }}Go/{{ user.storage }}Go</span>
+                            <div>
+                                {% for role in user.roles %}
+                                    {% if role == 'ROLE_ADMIN' %}
+                                        {% set name = "Administrateur" %}
+                                        {% set color = "danger" %}
+                                    {% else %}
+                                        {% set name = "Membre" %}
+                                        {% set color = "success" %}
+                                    {% endif %}
+                                    <span class="badge text-bg-{{ color }}">{{ name }}</span>
+                                {% endfor %}
+                            </div>
+                            <a class="btn btn-primary btn-sm" href="{{ path('app_admin_user_edit', {username: user.username}) }}" role="button">Gérer</a>
+                        </li>
+{#                            {% if user.isValid == false %}#}
+{#                                <p>{{ user.username }} : <a data-alert-off href="{{ path('app_admin_access_off', {username: user.username}) }}">Refuser l'accès</a></p>#}
+{#                                <p>{{ user.username }} : <a data-alert-on href="{{ path('app_admin_access_on', {username: user.username}) }}">Autoriser l'accès</a></p>#}
+{#                            {% endif %}#}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

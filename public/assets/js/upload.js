@@ -25,15 +25,15 @@ $('#uploaded_files_form_name').change(function ()
             {
                 if (e.lengthComputable)
                 {
-                    $('.progress-bar').removeClass('bg-success').addClass('progress-bar-striped progress-bar-animated');
+                    $('#progress-upload').removeClass('bg-success bg-danger').addClass('progress-bar-striped progress-bar-animated');
                     var percent = Math.round((e.loaded / e.total) * 100);
 
                     if (percent === 100)
                         percent = 99;
 
-                    $('.progress-bar').width(percent + '%');
-                    $('.progress-bar').text(percent + '%');
-                    $('.progress').attr('aria-valuenow', percent);
+                    $('#progress-upload').width(percent + '%');
+                    $('#progress-upload').text(percent + '%');
+                    $('#progress-upload').attr('aria-valuenow', percent);
                 }
             });
             return xhr;
@@ -41,15 +41,15 @@ $('#uploaded_files_form_name').change(function ()
         error: function (data)
         {
             alert(data.responseJSON.message);
-            $('.progress-bar').removeClass('progress-bar-striped progress-bar-animated').addClass('bg-danger');
-            $('.progress-bar').width('100%');
-            $('.progress-bar').text(data.responseJSON.message);
+            $('#progress-upload').removeClass('progress-bar-striped progress-bar-animated').addClass('bg-danger');
+            $('#progress-upload').width('100%');
+            $('#progress-upload').text(data.responseJSON.message);
         },
         success: function (data)
         {
-            $('.progress-bar').removeClass('progress-bar-striped progress-bar-animated').addClass('bg-success');
-            $('.progress-bar').width('100%');
-            $('.progress-bar').text('Terminé');
+            $('#progress-upload').removeClass('progress-bar-striped progress-bar-animated').addClass('bg-success');
+            $('#progress-upload').width('100%');
+            $('#progress-upload').text('Terminé');
 
             if (data.originalFilename.length > 20)
                 data.originalFilename = data.originalFilename.slice(0, 20) + '...';

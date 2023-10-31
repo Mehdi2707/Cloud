@@ -22,13 +22,22 @@ class FileUploadService
         $this->uploadDirectory = $uploadDirectory;
     }
 
-    public function uploadFile($file, Users $user): FileException|bool|\Exception|array
+    public function uploadFile($file, Users $user, $fileSize): FileException|bool|\Exception|array
     {
         $filesystem = new Filesystem();
         $uploadedFile = new UploadedFiles();
+        $storage = $user->getStorage();
+        $storageUsed = $user->getStorageUsed();
+        $storageUsedGo = round($storageUsed / 1073741824, 2);
+        $fileSizeMax = ($storage - $storageUsedGo);
 
         if ($file)
         {
+            $fileSizeGo = round($fileSize / 1073741824, 2);
+
+            if($fileSizeGo > $fileSizeMax)
+                return false;
+
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $safeFilename = $this->slugger->slug($originalFilename);
             $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
@@ -54,6 +63,7 @@ class FileUploadService
             $uploadedFile->setName($newFilename);
             $uploadedFile->setOriginalName($originalFilename);
             $uploadedFile->setUser($user);
+            $uploadedFile->setSize($fileSize);
 
             $this->entityManager->persist($uploadedFile);
             $this->entityManager->flush();

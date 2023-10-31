@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UsersRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -36,6 +37,12 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private ?bool $is_valid = false;
+
+    #[ORM\Column]
+    private ?int $storage = 0;
+
+    #[ORM\Column(type: Types::BIGINT)]
+    private ?string $storage_used = '0';
 
     public function __construct()
     {
@@ -150,6 +157,30 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsValid(bool $is_valid): static
     {
         $this->is_valid = $is_valid;
+
+        return $this;
+    }
+
+    public function getStorage(): ?int
+    {
+        return $this->storage;
+    }
+
+    public function setStorage(int $storage): static
+    {
+        $this->storage = $storage;
+
+        return $this;
+    }
+
+    public function getStorageUsed(): ?string
+    {
+        return $this->storage_used;
+    }
+
+    public function setStorageUsed(string $storage_used): static
+    {
+        $this->storage_used = $storage_used;
 
         return $this;
     }

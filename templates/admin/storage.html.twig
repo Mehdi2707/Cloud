@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('assets/js/storageCapacity.js') }}" defer></script>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1>Administration</h1>
+                <br>
+            </div>
+
+            <div class="col-6">
+                {% if storage is null %}
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="storageValue" aria-label="capacity">
+                        <span class="input-group-text">Go</span>
+                    </div>
+                    <button type="button" id="edit-storage" class="btn btn-primary btn-sm">Ajouter</button>
+                {% else %}
+                    Capacité maximale de stockage : {{ storage }}Go
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="storageValue" value="{{ storage }}" aria-label="capacity">
+                        <span class="input-group-text">Go</span>
+                    </div>
+                    <button type="button" id="edit-storage" class="btn btn-primary btn-sm">Modifier</button>
+                {% endif %}
+            </div>
+
+            <div class="col-6">
+                Total de l'espace alloué :
+                <div class="progress" role="progressbar" aria-label="storage" aria-valuenow="{{ storageUsers }}" aria-valuemin="0" aria-valuemax="{{ storage }}">
+                    <div class="progress-bar" style="width: {{ pourcentageStorageUsers }}%">{{ pourcentageStorageUsers }}% soit {{ storageUsers }}Go</div>
+                </div>
+            </div>
+
+            <div class="col-6">
+                Total de l'espace utilisé :
+                <div class="progress" role="progressbar" aria-label="storage" aria-valuenow="{{ storageUsersUsed }}" aria-valuemin="0" aria-valuemax="{{ storage }}">
+                    <div class="progress-bar overflow-visible text-dark" style="width: {{ pourcentageStorageUsersUsed }}%">{{ pourcentageStorageUsersUsed }}% soit {{ storageUsersUsed }}Go</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

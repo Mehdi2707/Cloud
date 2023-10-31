@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\UploadedFiles;
+use App\Repository\UploadedFilesRepository;
 use App\Service\FileUploadService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,13 +28,22 @@ class HomeController extends AbstractController
         if(!$user->getIsValid())
             return $this->redirectToRoute('app_welcome');
 
+        $storage = $user->getStorage();
+        $storageUsed = $user->getStorageUsed();
+
+        $storageUsedGo = round($storageUsed / 1073741824, 2);
+        $pourcentageStorageUsed = round(($storageUsedGo / $storage) * 100);
+
         return $this->render('home/index.html.twig', [
-            'files' => $user->getUploadedFiles()
+            'files' => $user->getUploadedFiles(),
+            'storageUsed' => $storageUsedGo,
+            'storage' => $storage,
+            'pourcentageStorageUsed' => $pourcentageStorageUsed
         ]);
     }
 
     #[Route('/upload', name: 'app_upload')]
-    public function upload(Request $request, FileUploadService $fileUploadService): JsonResponse
+    public function upload(Request $request, FileUploadService $fileUploadService, EntityManagerInterface $entityManager): JsonResponse
     {
         $user = $this->getUser();
 
@@ -46,10 +56,18 @@ class HomeController extends AbstractController
 
             if ($file)
             {
-                $result = $fileUploadService->uploadFile($file, $user);
+                $fileSize = $file->getSize();
+                $result = $fileUploadService->uploadFile($file, $user, $fileSize);
 
                 if ($result)
+                {
+                    $user->setStorageUsed($user->getStorageUsed() + $fileSize);
+
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+
                     return new JsonResponse($result);
+                }
                 else
                     return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload'], Response::HTTP_BAD_REQUEST);
             }
@@ -89,7 +107,7 @@ class HomeController extends AbstractController
     }
 
     #[Route('/delete/{fileName}', name: 'app_delete')]
-    public function delete(EntityManagerInterface $entityManager, string $fileName): Response
+    public function delete(EntityManagerInterface $entityManager, string $fileName, UploadedFilesRepository $uploadedFilesRepository): Response
     {
         $user = $this->getUser();
         if (!$user)
@@ -98,19 +116,18 @@ class HomeController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
+        $file = $uploadedFilesRepository->findOneBy(['name' => $fileName]);
+
+        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $file->getName();
 
         if (file_exists($filePath) && is_file($filePath))
         {
             unlink($filePath);
+            $user->setStorageUsed($user->getStorageUsed() - $file->getSize());
 
-            $uploadedFile = $entityManager->getRepository(UploadedFiles::class)->findOneBy(['name' => $fileName]);
-
-            if ($uploadedFile)
-            {
-                $entityManager->remove($uploadedFile);
-                $entityManager->flush();
-            }
+            $entityManager->remove($file);
+            $entityManager->persist($user);
+            $entityManager->flush();
 
             $this->addFlash('success', 'Le fichier a été supprimé avec succès');
             return $this->redirectToRoute('app_home');

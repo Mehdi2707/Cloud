@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('assets/js/alert.js') }}" defer></script>
+    <script src="{{ asset('assets/js/storage.js') }}" defer></script>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1>Administration</h1>
+                <br>
+            </div>
+
+            <div class="col-6 m-auto">
+                <div class="card m-auto text-center" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ user.username }}</h5>
+                        <span class="badge bg-dark rounded-pill mb-2">{{ (user.storageUsed/1073741824)|round(2, 'floor') }}Go/<span id="storageValueBadge">{{ user.storage }}</span>Go</span>
+                        <input type="range" class="form-range" min="0" value="{{ user.storage }}" max="{{ storage.capacity }}" id="storageMax">
+                        <p><strong>Capacité de stockage : <span id="storageValueText">{{ user.storage }}</span>Go</strong></p>
+                        <button id="submitButton" class="btn btn-danger btn-sm" type="button" style="display: none;">Modifier la capacité de stockage</button>
+                        <span style="display: none;" id="dataUsername">{{ user.username }}</span>
+                        <div class="my-3">
+                            {% for role in user.roles %}
+                                {% if role == 'ROLE_ADMIN' %}
+                                    {% set name = "Administrateur" %}
+                                    {% set color = "danger" %}
+                                {% else %}
+                                    {% set name = "Membre" %}
+                                    {% set color = "success" %}
+                                {% endif %}
+                                <span class="badge text-bg-{{ color }}">{{ name }}</span>
+                            {% endfor %}
+                        </div>
+                        {% if user.isValid == false %}
+                            <a class="link-danger link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" data-alert-on href="{{ path('app_admin_access_on', {username: user.username}) }}">Autoriser l'accès</a>
+                        {% else %}
+                            <a class="link-danger link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" data-alert-off href="{{ path('app_admin_access_off', {username: user.username}) }}">Refuser l'accès</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
