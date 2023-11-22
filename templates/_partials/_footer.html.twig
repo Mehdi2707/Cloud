@@ -1,1 +1,19 @@
-FOOTER
+<div class="bg-dark">
+    <div class="container">
+        <footer class="py-3 my-4">
+            <ul class="nav justify-content-center pb-3 mb-3" style="border-bottom: 1px solid #495057!important;">
+                {% if app.user %}
+                    <li class="nav-item"><a href="{{ path('app_home') }}" class="nav-link px-2 text-white-50">Mon espace</a></li>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <li class="nav-item"><a href="{{ path('app_admin') }}" class="nav-link px-2 text-white-50">Administration</a></li>
+                    {% endif %}
+                    <li class="nav-item"><a href="{{ path('app_logout') }}" class="nav-link px-2 text-white-50">Me déconnecter</a></li>
+                {% else %}
+                    <li class="nav-item"><a href="{{ path('app_register') }}" class="nav-link px-2 text-white-50">Inscription</a></li>
+                    <li class="nav-item"><a href="{{ path('app_login') }}" class="nav-link px-2 text-white-50">Connexion</a></li>
+                {% endif %}
+            </ul>
+            <p class="text-center text-white-50">© 2023 Mon Cloud</p>
+        </footer>
+    </div>
+</div>
