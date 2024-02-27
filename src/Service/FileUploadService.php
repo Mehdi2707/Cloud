@@ -39,6 +39,7 @@ class FileUploadService
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $safeFilename = $this->slugger->slug($originalFilename);
             $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
+            $extension = $file->guessExtension();
 
             if(!$filesystem->exists($this->uploadDirectory))
                 return false;
@@ -57,6 +58,29 @@ class FileUploadService
                 $this->uploadDirectory.$user->getUsername(),
                 $newFilename
             );
+
+            $formatsVideoToChange = [ 'mov', 'wmv', 'flv', 'avi', 'mkv' ];
+
+            if(in_array($extension, $formatsVideoToChange))
+            {
+                $folder = $this->uploadDirectory.$user->getUsername();
+                $newVideoName = pathinfo($newFilename, PATHINFO_FILENAME).'.mp4';
+
+                exec('/usr/bin/ffmpeg -y -i '.$folder.DIRECTORY_SEPARATOR.$newFilename.' -c:v libx264 -c:a aac -pix_fmt yuv420p -movflags faststart -hide_banner '.$folder.DIRECTORY_SEPARATOR.$newVideoName.' 2>&1', $out, $res);
+
+                if($res == 0)
+                {
+                    unlink($folder . DIRECTORY_SEPARATOR . $newFilename);
+                    $newFilename = $newVideoName;
+                }
+                else
+                {
+                    error_log(var_export($out, true));
+                    error_log(var_export($res, true));
+
+                    return false;
+                }
+            }
 
             $uploadedFile->setName($newFilename);
             $uploadedFile->setOriginalName($originalFilename);

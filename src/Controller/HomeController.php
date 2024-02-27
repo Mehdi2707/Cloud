@@ -156,7 +156,7 @@ class HomeController extends AbstractController
         if (file_exists($filePath)) {
             $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
 
-            $allowedExtensions = ['txt', 'pdf', 'jpg', 'jpeg', 'png', 'gif'];
+            $allowedExtensions = ['txt', 'pdf', 'jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'wmv', 'flv', 'avi', 'mkv'];
 
             if (in_array($fileExtension, $allowedExtensions))
             {
@@ -173,6 +173,13 @@ class HomeController extends AbstractController
                 {
                     return new BinaryFileResponse($filePath, 200, ['Content-Type' => 'image/' . $fileExtension], true);
                 }
+                elseif (in_array($fileExtension, ['mp4', 'mov', 'wmv', 'flv', 'avi', 'mkv']))
+                {
+                    return $this->render('home/viewFile.html.twig', [
+                        'fileName' => $fileName,
+                        'user' => $user
+                    ]);
+                }
             }
             else
                 $this->addFlash('warning', 'Le type de fichier n\'est pas autorisé');
@@ -181,6 +188,27 @@ class HomeController extends AbstractController
             $this->addFlash('warning', 'Le fichier que vous voulez afficher est introuvable');
 
         return $this->redirectToRoute('app_home');
+    }
+
+    #[Route('/video/{username}/{fileName}', name: 'app_video')]
+    public function video(string $username, string $fileName): Response
+    {
+        $user = $this->getUser();
+
+        if (!$user || $user->getUsername() !== $username) {
+            throw $this->createAccessDeniedException('Accès refusé.');
+        }
+
+        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
+
+        if (!file_exists($filePath) || !is_readable($filePath)) {
+            throw $this->createNotFoundException('La vidéo demandée est introuvable.');
+        }
+
+        $response = new BinaryFileResponse($filePath);
+        $response->headers->set('Content-Type', 'video/mp4');
+
+        return $response;
     }
 
     #[Route('/bienvenue', name: 'app_welcome')]
