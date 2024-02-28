@@ -142,7 +142,7 @@ class HomeController extends AbstractController
     }
 
     #[Route('/view/{fileName}', name: 'app_view')]
-    public function view(string $fileName): Response
+    public function view(string $fileName, UploadedFilesRepository $uploadedFilesRepository): Response
     {
         $user = $this->getUser();
 
@@ -150,6 +150,8 @@ class HomeController extends AbstractController
             $this->addFlash('warning', 'Pour accéder à votre espace, vous devez vous connecter');
             return $this->redirectToRoute('app_login');
         }
+
+        $originalFileName = $uploadedFilesRepository->findOneBy(['name' => $fileName])->getOriginalName();
 
         $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
 
@@ -167,7 +169,10 @@ class HomeController extends AbstractController
                 }
                 elseif (in_array($fileExtension, ['pdf']))
                 {
-                    return new BinaryFileResponse($filePath, 200, [], true);
+                    return $this->render('home/viewPDF.html.twig', [
+                        'content' => base64_encode(file_get_contents($filePath)),
+                        'originalFileName' => $originalFileName
+                    ]);
                 }
                 elseif (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif']))
                 {
@@ -175,9 +180,10 @@ class HomeController extends AbstractController
                 }
                 elseif (in_array($fileExtension, ['mp4', 'mov', 'wmv', 'flv', 'avi', 'mkv']))
                 {
-                    return $this->render('home/viewFile.html.twig', [
+                    return $this->render('home/viewVideo.html.twig', [
                         'fileName' => $fileName,
-                        'user' => $user
+                        'user' => $user,
+                        'originalFileName' => $originalFileName
                     ]);
                 }
             }
