@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\UploadedFiles;
 use App\Repository\UploadedFilesRepository;
 use App\Service\FileUploadService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -176,7 +175,11 @@ class HomeController extends AbstractController
                 }
                 elseif (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif']))
                 {
-                    return new BinaryFileResponse($filePath, 200, ['Content-Type' => 'image/' . $fileExtension], true);
+                    return $this->render('home/viewImage.html.twig', [
+                        'content' => base64_encode(file_get_contents($filePath)),
+                        'format' => $fileExtension,
+                        'originalFileName' => $originalFileName
+                    ]);
                 }
                 elseif (in_array($fileExtension, ['mp4', 'mov', 'wmv', 'flv', 'avi', 'mkv']))
                 {

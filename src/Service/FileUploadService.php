@@ -72,12 +72,10 @@ class FileUploadService
                 {
                     unlink($folder . DIRECTORY_SEPARATOR . $newFilename);
                     $newFilename = $newVideoName;
+                    $fileSize = filesize($folder.DIRECTORY_SEPARATOR.$newVideoName);
                 }
                 else
                 {
-                    error_log(var_export($out, true));
-                    error_log(var_export($res, true));
-
                     return false;
                 }
             }
