@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon espace{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center pb-5">
+                <h1 class="py-5">{{ originalFileName }}</h1>
+                <pre>{{ content|raw }}</pre>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -168,8 +168,10 @@ class HomeController extends AbstractController
             {
                 if (in_array($fileExtension, ['txt']))
                 {
-                    $content = file_get_contents($filePath);
-                    return new Response($content, 200, ['Content-Type' => 'text/plain']);
+                    return $this->render('home/viewTXT.html.twig', [
+                        'content' => file_get_contents($filePath),
+                        'originalFileName' => $originalFileName
+                    ]);
                 }
                 elseif (in_array($fileExtension, ['pdf']))
                 {
