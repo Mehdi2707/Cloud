@@ -55,27 +55,32 @@ class HomeController extends AbstractController
 
         if ($request->isXmlHttpRequest())
         {
-            $file = $request->files->get('file');
+            $files = $request->files->get('files');
+            $results = [];
 
-            if ($file)
+            foreach ($files as $file)
             {
-                $fileSize = $file->getSize();
-                $result = $fileUploadService->uploadFile($file, $user, $fileSize);
-
-                if ($result)
+                if ($file)
                 {
-                    $user->setStorageUsed($user->getStorageUsed() + $fileSize);
+                    $fileSize = $file->getSize();
+                    $result = $fileUploadService->uploadFile($file, $user, $fileSize);
 
-                    $entityManager->persist($user);
-                    $entityManager->flush();
+                    if ($result)
+                    {
+                        $user->setStorageUsed($user->getStorageUsed() + $fileSize);
 
-                    return new JsonResponse($result);
+                        $entityManager->persist($user);
+                        $entityManager->flush();
+
+                        $results[] = $result;
+                    }
+                    else
+                        return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload'], Response::HTTP_BAD_REQUEST);
                 }
                 else
-                    return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload'], Response::HTTP_BAD_REQUEST);
+                    return new JsonResponse(['success' => false, 'message' => 'Aucun fichier trouvé'], Response::HTTP_BAD_REQUEST);
             }
-            else
-                return new JsonResponse(['success' => false, 'message' => 'Aucun fichier trouvé'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse($results);
         }
 
         return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload'], Response::HTTP_BAD_REQUEST);
