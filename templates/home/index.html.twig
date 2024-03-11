@@ -4,6 +4,7 @@
 
 {% block javascripts %}
     <script src="{{ asset('assets/js/upload.js') }}" defer></script>
+    <script src="{{ asset('assets/js/folder.js') }}" defer></script>
 {% endblock %}
 
 {% block body %}
@@ -19,6 +20,16 @@
 
         <div class="row mt-3">
             <div class="col-lg-5 col-12 m-auto">
+                <h3>Ajouter un nouveau dossier</h3>
+
+                <div class="d-flex mb-3">
+                    <input class="form-control pr-1" type="text" id="folder_form_name" name="folder_form[name]" required="required" placeholder="MonDossier">
+                    <div style="width: 10px"></div>
+                    <button type="button" id="folder_form_name_submit" class="btn btn-primary">Créer</button>
+                </div>
+            </div>
+
+            <div class="col-lg-5 col-12 m-auto">
                 <h3>Ajouter un nouveau fichier</h3>
 
                 <div class="mb-3">
@@ -32,6 +43,21 @@
 
             <div class="col-12 mt-3">
                 <div class="d-flex flex-wrap justify-content-center file-list">
+                    {% for folder in folders %}
+                        <div class="card m-2" style="width: 17rem;">
+                            <div class="card-body">
+                                {% if folder.name|length > 20%}
+                                    <h5 class="card-title">{{ folder.name|slice(0,20) }}...</h5>
+                                {% else %}
+                                    <h5 class="card-title">{{ folder.name }}</h5>
+                                {% endif %}
+                                <a href="{{ path('app_viewFolder', {folderName: folder.name}) }}" class="btn btn-outline-dark btn-sm">Ouvrir</a>
+                                <a href="#" data-folder="{{ folder.name }}" class="btn btn-dark btn-sm renameFolder">Renommer</a>
+                                <a href="{{ path('app_deleteFolder', {folderName: folder.name}) }}" class="btn btn-danger btn-sm">Supprimer</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+
                     {% for file in files %}
                         <div class="card m-2" style="width: 16rem;">
                             <div class="card-body">

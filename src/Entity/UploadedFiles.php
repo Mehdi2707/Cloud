@@ -27,6 +27,9 @@ class UploadedFiles
     #[ORM\Column(type: Types::BIGINT)]
     private ?string $size = null;
 
+    #[ORM\ManyToOne(inversedBy: 'uploadedFiles')]
+    private ?Folder $folder = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -76,6 +79,18 @@ class UploadedFiles
     public function setSize(string $size): static
     {
         $this->size = $size;
+
+        return $this;
+    }
+
+    public function getFolder(): ?Folder
+    {
+        return $this->folder;
+    }
+
+    public function setFolder(?Folder $folder): static
+    {
+        $this->folder = $folder;
 
         return $this;
     }

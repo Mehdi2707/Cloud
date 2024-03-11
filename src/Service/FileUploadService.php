@@ -22,7 +22,7 @@ class FileUploadService
         $this->uploadDirectory = $uploadDirectory;
     }
 
-    public function uploadFile($file, Users $user, $fileSize): FileException|bool|\Exception|array
+    public function uploadFile($file, Users $user, $fileSize, $folder): FileException|bool|\Exception|array
     {
         $filesystem = new Filesystem();
         $uploadedFile = new UploadedFiles();
@@ -38,8 +38,8 @@ class FileUploadService
 
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $safeFilename = $this->slugger->slug($originalFilename);
-            $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
-            $extension = $file->guessExtension();
+            $newFilename = $safeFilename.'-'.uniqid().'.'.$file->getClientOriginalExtension();
+            $extension = $file->getClientOriginalExtension();
 
             if(!$filesystem->exists($this->uploadDirectory))
                 return false;
@@ -54,16 +54,22 @@ class FileUploadService
                 return $e;
             }
 
-            $file->move(
-                $this->uploadDirectory.$user->getUsername(),
-                $newFilename
-            );
+            if(!$folder)
+                $file->move(
+                    $this->uploadDirectory.$user->getUsername(),
+                    $newFilename
+                );
+            else
+                $file->move(
+                    $this->uploadDirectory.$user->getUsername().DIRECTORY_SEPARATOR.$folder->getName(),
+                    $newFilename
+                );
 
             $formatsVideoToChange = [ 'mov', 'wmv', 'flv', 'avi', 'mkv' ];
 
             if(in_array($extension, $formatsVideoToChange))
             {
-                $folder = $this->uploadDirectory.$user->getUsername();
+                $folder = $folder->getName() ? $this->uploadDirectory.$user->getUsername().DIRECTORY_SEPARATOR.$folder->getName() : $this->uploadDirectory.$user->getUsername();
                 $newVideoName = pathinfo($newFilename, PATHINFO_FILENAME).'.mp4';
 
                 exec('/usr/bin/ffmpeg -y -i '.$folder.DIRECTORY_SEPARATOR.$newFilename.' -c:v libx264 -c:a aac -pix_fmt yuv420p -movflags faststart -hide_banner '.$folder.DIRECTORY_SEPARATOR.$newVideoName.' 2>&1', $out, $res);
@@ -84,6 +90,7 @@ class FileUploadService
             $uploadedFile->setOriginalName($originalFilename);
             $uploadedFile->setUser($user);
             $uploadedFile->setSize($fileSize);
+            $uploadedFile->setFolder($folder);
 
             $this->entityManager->persist($uploadedFile);
             $this->entityManager->flush();

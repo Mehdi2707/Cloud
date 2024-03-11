@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Repository\FolderRepository;
 use App\Repository\UploadedFilesRepository;
 use App\Service\FileUploadService;
+use App\Service\FolderService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -15,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class HomeController extends AbstractController
 {
     #[Route('/', name: 'app_home')]
-    public function index(Request $request): Response
+    public function index(UploadedFilesRepository $uploadedFilesRepository): Response
     {
         $user = $this->getUser();
         if(!$user)
@@ -38,15 +40,44 @@ class HomeController extends AbstractController
             $pourcentageStorageUsed = round(($storageUsedGo / $storage) * 100);
 
         return $this->render('home/index.html.twig', [
-            'files' => $user->getUploadedFiles(),
+            'folders' => $user->getFolders(),
+            'files' => $uploadedFilesRepository->findBy(['folder' => null]),
             'storageUsed' => $storageUsedGo,
             'storage' => $storage,
             'pourcentageStorageUsed' => $pourcentageStorageUsed
         ]);
     }
 
+    #[Route('/folder', name: 'app_folder')]
+    public function folder(Request $request, FolderService $folderService): JsonResponse
+    {
+        $user = $this->getUser();
+
+        if(!$user->getIsValid())
+            return new JsonResponse(['success' => false, 'message' => 'Erreur', Response::HTTP_BAD_REQUEST]);
+
+        if ($request->isXmlHttpRequest())
+        {
+            $folderName = $request->request->get('folderName');
+
+            if ($folderName)
+            {
+                $result = $folderService->createFolder($folderName, $user);
+
+                if($result)
+                    return new JsonResponse($result);
+                else
+                    return new JsonResponse(['success' => false, 'message' => 'Erreur'], Response::HTTP_BAD_REQUEST);
+            }
+            else
+                return new JsonResponse(['success' => false, 'message' => 'Le nom du dossier n\'est pas valide'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return new JsonResponse(['success' => false, 'message' => 'Erreur'], Response::HTTP_BAD_REQUEST);
+    }
+
     #[Route('/upload', name: 'app_upload')]
-    public function upload(Request $request, FileUploadService $fileUploadService, EntityManagerInterface $entityManager): JsonResponse
+    public function upload(Request $request, FileUploadService $fileUploadService, EntityManagerInterface $entityManager, FolderRepository $folderRepository): JsonResponse
     {
         $user = $this->getUser();
 
@@ -56,6 +87,7 @@ class HomeController extends AbstractController
         if ($request->isXmlHttpRequest())
         {
             $files = $request->files->get('files');
+            $folderName = $request->request->get('folderName');
             $results = [];
 
             foreach ($files as $file)
@@ -63,7 +95,7 @@ class HomeController extends AbstractController
                 if ($file)
                 {
                     $fileSize = $file->getSize();
-                    $result = $fileUploadService->uploadFile($file, $user, $fileSize);
+                    $result = $fileUploadService->uploadFile($file, $user, $fileSize, $folderRepository->findOneBy(['name' => $folderName]));
 
                     if ($result)
                     {
@@ -86,8 +118,37 @@ class HomeController extends AbstractController
         return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload'], Response::HTTP_BAD_REQUEST);
     }
 
-    #[Route('/download/{fileName}', name: 'app_download')]
-    public function download($fileName): Response
+    #[Route('/renameFolder', name: 'app_renameFolder')]
+    public function renameFolder(Request $request, FolderService $folderService): Response
+    {
+        $user = $this->getUser();
+
+        if(!$user->getIsValid())
+            return new JsonResponse(['success' => false, 'message' => 'Erreur', Response::HTTP_BAD_REQUEST]);
+
+        if ($request->isXmlHttpRequest())
+        {
+            $newFolderName = $request->request->get('newFolderName');
+            $oldFolderName = $request->request->get('oldFolderName');
+
+            if ($newFolderName)
+            {
+                $result = $folderService->updateFolder($oldFolderName, $newFolderName, $user);
+
+                if($result)
+                    return new JsonResponse($result);
+                else
+                    return new JsonResponse(['success' => false, 'message' => 'Erreur'], Response::HTTP_BAD_REQUEST);
+            }
+            else
+                return new JsonResponse(['success' => false, 'message' => 'Le nom du dossier n\'est pas valide'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return new JsonResponse(['success' => false, 'message' => 'Erreur'], Response::HTTP_BAD_REQUEST);
+    }
+
+    #[Route('/deleteFolder/{folderName}', name: 'app_deleteFolder')]
+    public function deleteFolder(EntityManagerInterface $entityManager, string $folderName, FolderRepository $folderRepository): Response
     {
         $user = $this->getUser();
         if (!$user)
@@ -96,7 +157,84 @@ class HomeController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
+        $folder = $folderRepository->findOneBy(['name' => $folderName]);
+
+        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $folder->getName();
+
+        if (file_exists($filePath))
+        {
+            rmdir($filePath);
+
+            $entityManager->remove($folder);
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Le dossier a été supprimé avec succès');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $this->addFlash('warning', 'Le dossier que vous voulez supprimer est introuvable');
+        return $this->redirectToRoute('app_home');
+    }
+
+    #[Route('/viewFolder/{folderName}', name: 'app_viewFolder')]
+    public function viewFolder(string $folderName, FolderRepository $folderRepository): Response
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            $this->addFlash('warning', 'Pour accéder à votre espace, vous devez vous connecter');
+            return $this->redirectToRoute('app_login');
+        }
+
+        if(!$user->getIsValid())
+            return $this->redirectToRoute('app_welcome');
+
+        $storage = $user->getStorage();
+        $storageUsed = $user->getStorageUsed();
+
+        $storageUsedGo = round($storageUsed / 1073741824, 2);
+
+        if(!$storage)
+            $pourcentageStorageUsed = 0;
+        else
+            $pourcentageStorageUsed = round(($storageUsedGo / $storage) * 100);
+
+        $folder = $folderRepository->findOneBy(['name' => $folderName]);
+
+        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $folder->getName();
+
+        if (file_exists($filePath)) {
+            return $this->render('home/viewFolder.html.twig', [
+                'files' => $folder->getUploadedFiles(),
+                'storageUsed' => $storageUsedGo,
+                'storage' => $storage,
+                'pourcentageStorageUsed' => $pourcentageStorageUsed,
+                'folder' => $folder->getName()
+            ]);
+        }
+        else
+            $this->addFlash('warning', 'Le dossier que vous voulez ouvrir est introuvable');
+
+        return $this->redirectToRoute('app_home');
+    }
+
+    #[Route('/download/{fileName}', name: 'app_download')]
+    public function download($fileName, Request $request): Response
+    {
+        $user = $this->getUser();
+        if (!$user)
+        {
+            $this->addFlash('warning', 'Pour accéder à votre espace vous devez vous connecter');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $filePath =
+            $request->query->get('folder')
+                ?
+                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $request->query->get('folder') . '/' . $fileName
+                :
+                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
 
         if (file_exists($filePath))
         {
@@ -115,7 +253,7 @@ class HomeController extends AbstractController
     }
 
     #[Route('/delete/{fileName}', name: 'app_delete')]
-    public function delete(EntityManagerInterface $entityManager, string $fileName, UploadedFilesRepository $uploadedFilesRepository): Response
+    public function delete(EntityManagerInterface $entityManager, string $fileName, UploadedFilesRepository $uploadedFilesRepository, Request $request): Response
     {
         $user = $this->getUser();
         if (!$user)
@@ -126,7 +264,12 @@ class HomeController extends AbstractController
 
         $file = $uploadedFilesRepository->findOneBy(['name' => $fileName]);
 
-        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $file->getName();
+        $filePath =
+            $request->query->get('folder')
+                ?
+                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $request->query->get('folder') . '/' . $file->getName()
+                :
+                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $file->getName();
 
         if (file_exists($filePath) && is_file($filePath))
         {
@@ -138,15 +281,20 @@ class HomeController extends AbstractController
             $entityManager->flush();
 
             $this->addFlash('success', 'Le fichier a été supprimé avec succès');
-            return $this->redirectToRoute('app_home');
+
+            if($request->query->get('folder'))
+                return $this->redirectToRoute('app_viewFolder', ['folderName' => $request->query->get('folder')]);
+            else
+                return $this->redirectToRoute('app_home');
         }
 
         $this->addFlash('warning', 'Le fichier que vous voulez supprimer est introuvable');
+
         return $this->redirectToRoute('app_home');
     }
 
     #[Route('/view/{fileName}', name: 'app_view')]
-    public function view(string $fileName, UploadedFilesRepository $uploadedFilesRepository): Response
+    public function view(string $fileName, UploadedFilesRepository $uploadedFilesRepository, Request $request): Response
     {
         $user = $this->getUser();
 
@@ -157,7 +305,12 @@ class HomeController extends AbstractController
 
         $originalFileName = $uploadedFilesRepository->findOneBy(['name' => $fileName])->getOriginalName();
 
-        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
+        $filePath =
+            $request->query->get('folder')
+                ?
+                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $request->query->get('folder') . '/' . $fileName
+                :
+                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
 
         if (file_exists($filePath)) {
             $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
@@ -193,7 +346,8 @@ class HomeController extends AbstractController
                     return $this->render('home/viewVideo.html.twig', [
                         'fileName' => $fileName,
                         'user' => $user,
-                        'originalFileName' => $originalFileName
+                        'originalFileName' => $originalFileName,
+                        'folder' => $request->query->get('folder')
                     ]);
                 }
             }
@@ -207,7 +361,7 @@ class HomeController extends AbstractController
     }
 
     #[Route('/video/{username}/{fileName}', name: 'app_video')]
-    public function video(string $username, string $fileName): Response
+    public function video(string $username, string $fileName, Request $request): Response
     {
         $user = $this->getUser();
 
@@ -215,7 +369,12 @@ class HomeController extends AbstractController
             throw $this->createAccessDeniedException('Accès refusé.');
         }
 
-        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
+        $filePath =
+            $request->query->get('folder')
+                ?
+                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $request->query->get('folder') . '/' . $fileName
+                :
+                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
 
         if (!file_exists($filePath) || !is_readable($filePath)) {
             throw $this->createNotFoundException('La vidéo demandée est introuvable.');

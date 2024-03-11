@@ -1,6 +1,7 @@
 $('#uploaded_files_form_name').change(function ()
 {
     var files = $(this)[0].files;
+    var folder = $(this).data("folder");
     var maxFileSize = 2147483648; // Taille maximale autorisée en octets (2 Go).
 
     for (var i = 0; i < files.length; i++) {
@@ -11,6 +12,9 @@ $('#uploaded_files_form_name').change(function ()
     }
 
     var formData = new FormData();
+
+    if(folder)
+        formData.append('folderName', folder);
 
     for (var i = 0; i < files.length; i++) {
         formData.append('files[]', files[i]);
@@ -61,13 +65,18 @@ $('#uploaded_files_form_name').change(function ()
                 if (file.originalFilename.length > 20)
                     file.originalFilename = file.originalFilename.slice(0, 20) + '...';
 
+                let query = "";
+
+                if(folder)
+                    query = "?folder=" + folder;
+
                 $('.file-list').append(
                     '<div class="card m-2" style="width: 16rem;">' +
                     '<div class="card-body">' +
                     '<h5 class="card-title">' + file.originalFilename + '</h5>' +
-                    '<a href="/view/' + file.newFilename + '" class="btn btn-outline-dark btn-sm" style="margin-right: 5px;">Voir</a>' +
-                    '<a href="/download/' + file.newFilename + '" class="btn btn-dark btn-sm" style="margin-right: 5px;">Télécharger</a>' +
-                    '<a href="/delete/' + file.newFilename + '" class="btn btn-danger btn-sm">Supprimer</a>' +
+                    '<a href="/view/' + file.newFilename + query + '" class="btn btn-outline-dark btn-sm" style="margin-right: 5px;">Voir</a>' +
+                    '<a href="/download/' + file.newFilename + query + '" class="btn btn-dark btn-sm" style="margin-right: 5px;">Télécharger</a>' +
+                    '<a href="/delete/' + file.newFilename + query + '" class="btn btn-danger btn-sm">Supprimer</a>' +
                     '</div>' +
                     '</div>'
                 );

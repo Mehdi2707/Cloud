@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon espace{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('assets/js/upload.js') }}" defer></script>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-5 col-12 m-auto">
+                <h3>Espace utilisé :</h3>
+                <div class="progress" role="progressbar" aria-label="storage" aria-valuenow="{{ storageUsed }}" aria-valuemin="0" aria-valuemax="{{ storage }}">
+                    <div class="progress-bar overflow-visible text-dark" style="width: {{ pourcentageStorageUsed }}%">{{ pourcentageStorageUsed }}% soit {{ storageUsed }}Go/{{ storage }}Go</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-lg-5 col-12 m-auto">
+                <h3>Ajouter un nouveau fichier</h3>
+
+                <div class="mb-3">
+                    <input class="form-control" type="file" id="uploaded_files_form_name" data-folder="{{ folder }}" name="uploaded_files_form[name]" multiple required="required">
+                </div>
+
+                <div class="progress" role="progressbar" aria-label="Animated striped" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div id="progress-upload" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0">0%</div>
+                </div>
+            </div>
+
+            <div class="col-12 mt-3">
+                <h4 class="text-center">{{ folder }}</h4>
+                <div class="d-flex flex-wrap justify-content-center file-list">
+                    {% for file in files %}
+                        <div class="card m-2" style="width: 16rem;">
+                            <div class="card-body">
+                                {% if file.originalName|length > 20%}
+                                    <h5 class="card-title">{{ file.originalName|slice(0,20) }}...</h5>
+                                {% else %}
+                                    <h5 class="card-title">{{ file.originalName }}</h5>
+                                {% endif %}
+                                <a href="{{ path('app_view', {fileName: file.name, folder: folder}) }}" class="btn btn-outline-dark btn-sm">Voir</a>
+                                <a href="{{ path('app_download', {fileName: file.name, folder: folder}) }}" class="btn btn-dark btn-sm">Télécharger</a>
+                                <a href="{{ path('app_delete', {fileName: file.name, folder: folder}) }}" class="btn btn-danger btn-sm">Supprimer</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
