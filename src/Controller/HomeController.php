@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 
 class HomeController extends AbstractController
@@ -220,7 +221,7 @@ class HomeController extends AbstractController
     }
 
     #[Route('/download/{fileName}', name: 'app_download')]
-    public function download($fileName, Request $request): Response
+    public function download($fileName, Request $request): BinaryFileResponse
     {
         $user = $this->getUser();
         if (!$user)
@@ -238,10 +239,12 @@ class HomeController extends AbstractController
 
         if (file_exists($filePath))
         {
-            $response = new Response();
+            $response = new BinaryFileResponse($filePath);
             $response->headers->set('Content-Type', 'application/octet-stream');
-            $response->headers->set('Content-Disposition', 'attachment; filename="' . $fileName . '"');
-            $response->setContent(file_get_contents($filePath));
+            $response->setContentDisposition(
+                ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+                $fileName
+            );
 
             return $response;
         }
