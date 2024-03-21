@@ -392,6 +392,17 @@ class HomeController extends AbstractController
     #[Route('/bienvenue', name: 'app_welcome')]
     public function welcome(): Response
     {
+        $user = $this->getUser();
+        if(!$user)
+        {
+            $this->addFlash('warning', 'Pour accéder à votre espace vous devez vous connecter');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $isValid = $user->getIsValid();
+        if($isValid)
+            return $this->redirectToRoute('app_home');
+
         return $this->render('home/welcome.html.twig', [
 
         ]);
