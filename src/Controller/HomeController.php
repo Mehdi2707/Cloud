@@ -7,6 +7,7 @@ use App\Repository\UploadedFilesRepository;
 use App\Service\FileUploadService;
 use App\Service\FolderService;
 use Doctrine\ORM\EntityManagerInterface;
+use mysql_xdevapi\Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -55,7 +56,7 @@ class HomeController extends AbstractController
         $user = $this->getUser();
 
         if(!$user->getIsValid())
-            return new JsonResponse(['success' => false, 'message' => 'Erreur', Response::HTTP_BAD_REQUEST]);
+            return new JsonResponse(['success' => false, 'message' => 'Erreur.']);
 
         if ($request->isXmlHttpRequest())
         {
@@ -68,13 +69,13 @@ class HomeController extends AbstractController
                 if($result)
                     return new JsonResponse($result);
                 else
-                    return new JsonResponse(['success' => false, 'message' => 'Erreur'], Response::HTTP_BAD_REQUEST);
+                    return new JsonResponse(['success' => false, 'message' => 'Un problème est survenue lors de la création du dossier.']);
             }
             else
-                return new JsonResponse(['success' => false, 'message' => 'Le nom du dossier n\'est pas valide'], Response::HTTP_BAD_REQUEST);
+                return new JsonResponse(['success' => false, 'message' => 'Le nom du dossier n\'est pas valide.']);
         }
 
-        return new JsonResponse(['success' => false, 'message' => 'Erreur'], Response::HTTP_BAD_REQUEST);
+        return new JsonResponse(['success' => false, 'message' => 'Un problème est survenue lors de la soumission, veuillez réessayer plus tard.']);
     }
 
     #[Route('/upload', name: 'app_upload')]
@@ -125,7 +126,7 @@ class HomeController extends AbstractController
         $user = $this->getUser();
 
         if(!$user->getIsValid())
-            return new JsonResponse(['success' => false, 'message' => 'Erreur', Response::HTTP_BAD_REQUEST]);
+            return new JsonResponse(['success' => false, 'message' => 'Erreur.']);
 
         if ($request->isXmlHttpRequest())
         {
@@ -139,13 +140,13 @@ class HomeController extends AbstractController
                 if($result)
                     return new JsonResponse($result);
                 else
-                    return new JsonResponse(['success' => false, 'message' => 'Erreur'], Response::HTTP_BAD_REQUEST);
+                    return new JsonResponse(['success' => false, 'message' => 'Un problème est survenue lors du renommage du dossier.']);
             }
             else
-                return new JsonResponse(['success' => false, 'message' => 'Le nom du dossier n\'est pas valide'], Response::HTTP_BAD_REQUEST);
+                return new JsonResponse(['success' => false, 'message' => 'Le nom du dossier n\'est pas valide.']);
         }
 
-        return new JsonResponse(['success' => false, 'message' => 'Erreur'], Response::HTTP_BAD_REQUEST);
+        return new JsonResponse(['success' => false, 'message' => 'Un problème est survenue lors de la soumission, veuillez réessayer plus tard.']);
     }
 
     #[Route('/deleteFolder/{folderName}', name: 'app_deleteFolder')]

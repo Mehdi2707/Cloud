@@ -4,7 +4,6 @@
 
 {% block javascripts %}
     <script src="{{ asset('assets/js/upload.js') }}" defer></script>
-    <script src="{{ asset('assets/js/folder.js') }}" defer></script>
 {% endblock %}
 
 {% block body %}
@@ -22,11 +21,13 @@
             <div class="col-lg-5 col-12 m-auto">
                 <h3>Ajouter un nouveau dossier</h3>
 
-                <div class="d-flex mb-3">
+                <form data-controller="add-folder" data-action="submit->add-folder#submit">
                     <input class="form-control pr-1" type="text" id="folder_form_name" name="folder_form[name]" required="required" placeholder="MonDossier">
-                    <div style="width: 10px"></div>
-                    <button type="button" id="folder_form_name_submit" class="btn btn-primary">Créer</button>
-                </div>
+                    <div class="invalid-feedback"></div>
+                    <div class="valid-feedback"></div>
+                    <div style="height: 10px"></div>
+                    <button type="submit" class="btn btn-primary">Créer</button>
+                </form>
             </div>
 
             <div class="col-lg-5 col-12 m-auto">
@@ -52,7 +53,7 @@
                                     <h5 class="card-title">{{ folder.name }}</h5>
                                 {% endif %}
                                 <a href="{{ path('app_viewFolder', {folderName: folder.name}) }}" class="btn btn-outline-dark btn-sm">Ouvrir</a>
-                                <a href="#" data-folder="{{ folder.name }}" class="btn btn-dark btn-sm renameFolder">Renommer</a>
+                                <a data-controller="rename-folder" data-action="click->rename-folder#next" href="#" data-folder="{{ folder.name }}" class="btn btn-dark btn-sm">Renommer</a>
                                 <a href="{{ path('app_deleteFolder', {folderName: folder.name}) }}" class="btn btn-danger btn-sm">Supprimer</a>
                             </div>
                         </div>
