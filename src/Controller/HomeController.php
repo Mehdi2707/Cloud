@@ -84,7 +84,7 @@ class HomeController extends AbstractController
         $user = $this->getUser();
 
         if(!$user->getIsValid())
-            return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload', Response::HTTP_BAD_REQUEST]);
+            return new JsonResponse(['success' => false, 'message' => 'Erreur']);
 
         if ($request->isXmlHttpRequest())
         {
@@ -109,15 +109,15 @@ class HomeController extends AbstractController
                         $results[] = $result;
                     }
                     else
-                        return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload'], Response::HTTP_BAD_REQUEST);
+                        return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload']);
                 }
                 else
-                    return new JsonResponse(['success' => false, 'message' => 'Aucun fichier trouvé'], Response::HTTP_BAD_REQUEST);
+                    return new JsonResponse(['success' => false, 'message' => 'Aucun fichier trouvé']);
             }
             return new JsonResponse($results);
         }
 
-        return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload'], Response::HTTP_BAD_REQUEST);
+        return new JsonResponse(['success' => false, 'message' => 'Erreur lors de l\'upload']);
     }
 
     #[Route('/renameFolder', name: 'app_renameFolder')]
