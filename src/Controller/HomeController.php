@@ -86,7 +86,9 @@ class HomeController extends AbstractController
         if(!$user->getIsValid())
             return new JsonResponse(['success' => false, 'message' => 'Erreur']);
 
-        if ($request->isXmlHttpRequest())
+        $csrfToken = $request->request->get('csrf-token');
+
+        if ($this->isCsrfTokenValid('upload_files', $csrfToken) && $request->isXmlHttpRequest())
         {
             $files = $request->files->get('files');
             $folderName = $request->request->get('folderName');

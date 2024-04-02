@@ -7,6 +7,7 @@ export default class extends Controller {
         var files = this.element.files;
         var folder = this.element.dataset.folder;
         var maxFileSize = 2147483648; // Taille maximale autorisée en octets (2 Go).
+        var csrfToken = document.querySelector('input[name="csrf-token"]').value;
 
         for (var i = 0; i < files.length; i++) {
             if (files[i].size > maxFileSize) {
@@ -18,6 +19,8 @@ export default class extends Controller {
         }
 
         var formData = new FormData();
+
+        formData.append('csrf-token', csrfToken);
 
         if(folder)
             formData.append('folderName', folder);

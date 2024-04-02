@@ -2,10 +2,6 @@
 
 {% block title %}Mon espace{% endblock %}
 
-{% block javascripts %}
-{#    <script src="{{ asset('assets/js/upload.js') }}" defer></script>#}
-{% endblock %}
-
 {% block body %}
     <div class="container">
         <div class="row">
@@ -22,6 +18,7 @@
                 <h3>Ajouter un nouveau fichier</h3>
 
                 <div class="mb-3">
+                    <input type="hidden" name="csrf-token" value="{{ csrf_token('upload_files') }}">
                     <input data-controller="upload" data-action="change->upload#next" class="form-control" type="file" id="uploaded_files_form_name" data-folder="{{ folder }}" name="uploaded_files_form[name]" multiple required="required">
                 </div>
 
