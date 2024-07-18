@@ -410,4 +410,47 @@ class HomeController extends AbstractController
 
         ]);
     }
+
+    #[Route('/examen', name: 'app_examen')]
+    public function examen(): Response
+    {
+        $directory = $this->getParameter('kernel.project_dir') . '/public/assets/examen';
+        $files = $this->getFilesFromDirectory($directory);
+
+        return $this->render('home/examen.html.twig', [
+            'files' => $files,
+        ]);
+    }
+
+    private function getFilesFromDirectory($directory): array
+    {
+        $files = [];
+        if (is_dir($directory)) {
+            if ($handle = opendir($directory)) {
+                while (false !== ($entry = readdir($handle))) {
+                    if ($entry != "." && $entry != "..") {
+                        $files[] = $entry;
+                    }
+                }
+                closedir($handle);
+            }
+        }
+        return $files;
+    }
+
+    #[Route('/viewExam/{fileName}', name: 'app_view_exam')]
+    public function viewExam(string $fileName): Response
+    {
+        $filePath = $this->getParameter('kernel.project_dir') . '/public/assets/examen/' . $fileName;
+
+        if (file_exists($filePath)) {
+            return $this->render('home/viewExamPDF.html.twig', [
+                'filePath' => '/assets/examen/' . $fileName,
+                'originalFileName' => $fileName
+            ]);
+        } else {
+            $this->addFlash('warning', 'Le fichier que vous voulez afficher est introuvable');
+            return $this->redirectToRoute('app_examen');
+        }
+    }
 }
