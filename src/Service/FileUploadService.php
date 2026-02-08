@@ -40,14 +40,12 @@ class FileUploadService
             $safeFilename = $this->slugger->slug($originalFilename);
             $newFilename = $safeFilename.'-'.uniqid().'.'.$file->getClientOriginalExtension();
             $extension = $file->getClientOriginalExtension();
-
-            if(!$filesystem->exists($this->uploadDirectory))
-                return false;
+            $uploadDirectory = $filesystem->exists($this->uploadDirectory) ? $this->uploadDirectory : "/home/Mehdi/Cloud/";
 
             try
             {
-                if(!$filesystem->exists($this->uploadDirectory.$user->getUsername()))
-                    $filesystem->mkdir($this->uploadDirectory.$user->getUsername());
+                if(!$filesystem->exists($uploadDirectory.$user->getUsername()))
+                    $filesystem->mkdir($uploadDirectory.$user->getUsername());
             }
             catch (FileException $e)
             {
@@ -56,12 +54,12 @@ class FileUploadService
 
             if(!$folder)
                 $file->move(
-                    $this->uploadDirectory.$user->getUsername(),
+                    $uploadDirectory.$user->getUsername(),
                     $newFilename
                 );
             else
                 $file->move(
-                    $this->uploadDirectory.$user->getUsername().DIRECTORY_SEPARATOR.$folder->getName(),
+                    $uploadDirectory.$user->getUsername().DIRECTORY_SEPARATOR.$folder->getName(),
                     $newFilename
                 );
 
@@ -69,7 +67,7 @@ class FileUploadService
 
             if(in_array($extension, $formatsVideoToChange))
             {
-                $folder = $folder->getName() ? $this->uploadDirectory.$user->getUsername().DIRECTORY_SEPARATOR.$folder->getName() : $this->uploadDirectory.$user->getUsername();
+                $folder = $folder->getName() ? $uploadDirectory.$user->getUsername().DIRECTORY_SEPARATOR.$folder->getName() : $uploadDirectory.$user->getUsername();
                 $newVideoName = pathinfo($newFilename, PATHINFO_FILENAME).'.mp4';
 
                 exec('/usr/bin/ffmpeg -y -i '.$folder.DIRECTORY_SEPARATOR.$newFilename.' -c:v libx264 -c:a aac -pix_fmt yuv420p -movflags faststart -hide_banner '.$folder.DIRECTORY_SEPARATOR.$newVideoName.' 2>&1', $out, $res);
