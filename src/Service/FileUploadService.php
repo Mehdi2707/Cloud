@@ -38,9 +38,9 @@ class FileUploadService
 
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $safeFilename = $this->slugger->slug($originalFilename);
-            $newFilename = $safeFilename.'-'.uniqid().'.'.$file->getClientOriginalExtension(); 
+            $newFilename = $safeFilename.'-'.uniqid().'.'.$file->getClientOriginalExtension();
             $extension = $file->getClientOriginalExtension();
-            $uploadDirectory = $filesystem->exists($this->uploadDirectory) ? $this->uploadDirectory : "/home/Mehdi/Cloud/";
+            $uploadDirectory = $filesystem->exists($this->uploadDirectory) ? $this->uploadDirectory : "/var/www/html/EmergencyStockage/";
 
             try
             {
