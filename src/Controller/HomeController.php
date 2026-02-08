@@ -163,7 +163,7 @@ class HomeController extends AbstractController
 
         $folder = $folderRepository->findOneBy(['name' => $folderName]);
 
-        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $folder->getName();
+        $filePath = file_exists($this->getParameter('app.uploaddirectory')) ? $this->getParameter('app.uploaddirectory') : "/var/www/html/EmergencyStockage/" . $user->getUsername() . '/' . $folder->getName();
 
         if (file_exists($filePath))
         {
@@ -206,7 +206,7 @@ class HomeController extends AbstractController
 
         $folder = $folderRepository->findOneBy(['name' => $folderName]);
 
-        $filePath = $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $folder->getName();
+        $filePath = file_exists($this->getParameter('app.uploaddirectory')) ? $this->getParameter('app.uploaddirectory') : "/var/www/html/EmergencyStockage/" . $user->getUsername() . '/' . $folder->getName();
 
         if (file_exists($filePath)) {
             return $this->render('home/viewFolder.html.twig', [
@@ -236,9 +236,9 @@ class HomeController extends AbstractController
         $filePath =
             $request->query->get('folder')
                 ?
-                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $request->query->get('folder') . '/' . $fileName
+                file_exists($this->getParameter('app.uploaddirectory')) ? $this->getParameter('app.uploaddirectory') : "/var/www/html/EmergencyStockage/" . $user->getUsername() . '/' . $request->query->get('folder') . '/' . $fileName
                 :
-                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
+                (file_exists($this->getParameter('app.uploaddirectory')) ? $this->getParameter('app.uploaddirectory') : "/var/www/html/EmergencyStockage/" . $user->getUsername() . '/' . $fileName);
 
         if (file_exists($filePath))
         {
@@ -273,9 +273,9 @@ class HomeController extends AbstractController
         $filePath =
             $request->query->get('folder')
                 ?
-                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $request->query->get('folder') . '/' . $file->getName()
+                file_exists($this->getParameter('app.uploaddirectory')) ? $this->getParameter('app.uploaddirectory') : "/var/www/html/EmergencyStockage/" . $user->getUsername() . '/' . $request->query->get('folder') . '/' . $file->getName()
                 :
-                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $file->getName();
+                (file_exists($this->getParameter('app.uploaddirectory')) ? $this->getParameter('app.uploaddirectory') : "/var/www/html/EmergencyStockage/" . $user->getUsername() . '/' . $file->getName());
 
         if (file_exists($filePath) && is_file($filePath))
         {
@@ -314,9 +314,9 @@ class HomeController extends AbstractController
         $filePath =
             $request->query->get('folder')
                 ?
-                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $request->query->get('folder') . '/' . $fileName
+                file_exists($this->getParameter('app.uploaddirectory')) ? $this->getParameter('app.uploaddirectory') : "/var/www/html/EmergencyStockage/" . $user->getUsername() . '/' . $request->query->get('folder') . '/' . $fileName
                 :
-                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
+                (file_exists($this->getParameter('app.uploaddirectory')) ? $this->getParameter('app.uploaddirectory') : "/var/www/html/EmergencyStockage/" . $user->getUsername() . '/' . $fileName);
 
         if (file_exists($filePath)) {
             $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
@@ -378,9 +378,9 @@ class HomeController extends AbstractController
         $filePath =
             $request->query->get('folder')
                 ?
-                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $request->query->get('folder') . '/' . $fileName
+                file_exists($this->getParameter('app.uploaddirectory')) ? $this->getParameter('app.uploaddirectory') : "/var/www/html/EmergencyStockage/" . $user->getUsername() . '/' . $request->query->get('folder') . '/' . $fileName
                 :
-                $this->getParameter('app.uploaddirectory') . $user->getUsername() . '/' . $fileName;
+                (file_exists($this->getParameter('app.uploaddirectory')) ? $this->getParameter('app.uploaddirectory') : "/var/www/html/EmergencyStockage/" . $user->getUsername() . '/' . $fileName);
 
         if (!file_exists($filePath) || !is_readable($filePath)) {
             throw $this->createNotFoundException('La vidéo demandée est introuvable.');
